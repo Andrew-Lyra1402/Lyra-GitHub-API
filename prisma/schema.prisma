@@ -36,4 +36,9 @@ model Commit {
   repo        Repo     @relation(fields: [repoId], references: [id])
   repoId      String
   author      String?
+  committer   String?
+  numberOfLinesAdded Int?
+  numberOfLinesRemoved Int?
+
+  @@unique([commitHash])
 }

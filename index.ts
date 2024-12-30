@@ -3,8 +3,8 @@ import { createNodeMiddleware } from "@octokit/webhooks";
 import * as http from "http";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import { WebhookPayload } from "./types";
-import { handleInstallation } from "./event-handler";
+import { Repository, WebhookPayload } from "./types";
+import { handleInstallation, handlePush } from "./event-handler";
 
 dotenv.config();
 
@@ -30,16 +30,30 @@ const app = new App({
 
 // Add webhook listener
 app.webhooks.on('installation.created', async ({ payload }) => {
-  console.log("Installation created");
-  console.log(payload.repositories);
-  const typedPayload = payload as unknown as WebhookPayload;
-  await handleInstallation(
-    app,
-    prisma,
-    typedPayload.installation,
-    typedPayload.repositories
-  );
+  try {
+    console.log("Installation created");
+    
+    const typedPayload = payload as unknown as WebhookPayload;
+    handleInstallation(
+      app,
+      prisma,
+      typedPayload.installation,
+      typedPayload.repositories as Repository[],
+      
+    );
+    console.log("Installation handling completed successfully");
+  } catch (error) {
+    console.error("Error in installation webhook handler:", error);
+    throw error;
+  }
 });
+
+app.webhooks.on("push", async ({ payload }) => {
+  console.log("Push event received");
+  console.log(payload);
+  handlePush(app, prisma, payload);
+});
+
 
 const middleware = createNodeMiddleware(app.webhooks, {
   path: "/api/webhook",
