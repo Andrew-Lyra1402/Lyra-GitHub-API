@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "prisma generate",
     "start": "tsx index.ts",
     "smee": "npx smee -u https://smee.io/xnJNcm7zRkfRvQS4 -t http://localhost:3000/api/webhook"
   },

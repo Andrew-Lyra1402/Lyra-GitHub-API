@@ -33,7 +33,7 @@ model Commit {
   message     String
   commitHash  String?
   timestamp   DateTime?
-  url         String?
   repo        Repo     @relation(fields: [repoId], references: [id])
-  repoId      Int
+  repoId      String
+  author      String?
 }
