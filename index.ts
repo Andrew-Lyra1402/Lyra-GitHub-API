@@ -13,6 +13,9 @@ const prisma = new PrismaClient();
 const appId = process.env.GITHUB_APP_ID!;
 const privateKey = process.env.PRIVATE_KEY!;
 const webhookSecret = process.env.WEBHOOK_SECRET!;
+const clientId = process.env.GITHUB_CLIENT_ID!;
+const clientSecret = process.env.GITHUB_CLIENT_SECRET!;
+const callbackUrl = process.env.CALLBACK_URL!;
 
 const port = process.env.PORT || 3000;
 
@@ -27,6 +30,7 @@ const app = new App({
     secret: webhookSecret,
   },
 });
+
 
 // Add webhook listener
 app.webhooks.on('installation.created', async ({ payload }) => {
@@ -49,9 +53,8 @@ app.webhooks.on('installation.created', async ({ payload }) => {
 });
 
 app.webhooks.on("push", async ({ payload }) => {
-  console.log("Push event received");
-  console.log(payload);
   handlePush(app, prisma, payload);
+  
 });
 
 
@@ -59,7 +62,11 @@ const middleware = createNodeMiddleware(app.webhooks, {
   path: "/api/webhook",
 });
 
-// Create server
+// Update your server startup
 http.createServer(middleware).listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+
+
+

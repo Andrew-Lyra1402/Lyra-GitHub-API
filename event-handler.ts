@@ -1,7 +1,7 @@
 import { App } from "@octokit/app";
 import { Commit, PrismaClient, Repo, User } from "@prisma/client";
 import { Octokit } from "octokit";
-import { PushPayload, InstallationPayload, Repository, DetailedCommit } from "./types";
+import { InstallationPayload, Repository, DetailedCommit } from "./types";
 
 export async function updateCommitStats(
   installationClient: Octokit,
