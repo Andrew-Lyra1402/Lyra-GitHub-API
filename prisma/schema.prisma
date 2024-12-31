@@ -15,7 +15,9 @@ datasource db {
 
 model User {
   id      String   @id @default(cuid())
-  GitHubUsername    String? @unique
+  GitHubUsername    String @unique
+  accessToken String?
+  refreshToken String?
   repos   Repo[]
 }
 
