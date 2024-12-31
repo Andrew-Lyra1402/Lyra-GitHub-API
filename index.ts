@@ -13,9 +13,6 @@ const prisma = new PrismaClient();
 const appId = process.env.GITHUB_APP_ID!;
 const privateKey = process.env.PRIVATE_KEY!;
 const webhookSecret = process.env.WEBHOOK_SECRET!;
-const clientId = process.env.GITHUB_CLIENT_ID!;
-const clientSecret = process.env.GITHUB_CLIENT_SECRET!;
-const callbackUrl = process.env.CALLBACK_URL!;
 
 const port = process.env.PORT || 3000;
 
