@@ -40,5 +40,4 @@ model Commit {
   numberOfLinesAdded Int?
   numberOfLinesRemoved Int?
 
-  @@unique([commitHash])
 }

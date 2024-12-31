@@ -44,7 +44,7 @@ app.webhooks.on('installation.created', async ({ payload }) => {
     console.log("Installation handling completed successfully");
   } catch (error) {
     console.error("Error in installation webhook handler:", error);
-    throw error;
+    
   }
 });
 

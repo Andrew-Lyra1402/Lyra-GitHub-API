@@ -38,7 +38,7 @@ export async function updateCommitStats(
     }
   } catch (error) {
     console.error(`Error in updateCommitStats for ${repoName}:`, error);
-    throw error;
+    
   }
 }
 
@@ -137,7 +137,7 @@ export async function handleInstallation(
 
   } catch (error) {
     console.error("Error in handleInstallation:", error);
-    throw error;
+    
   }
 }
 
@@ -199,6 +199,6 @@ export async function handlePush(
     console.log(`Successfully processed ${newCommits.length} new commits`);
   } catch (error) {
     console.error("Error in handlePush:", error);
-    throw error;
+    
   }
 }
