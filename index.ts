@@ -14,6 +14,7 @@ const appId = process.env.GITHUB_APP_ID!;
 const privateKey = process.env.PRIVATE_KEY!;
 const webhookSecret = process.env.WEBHOOK_SECRET!;
 
+//Port for the server
 const port = process.env.PORT || 3000;
 
 if (!appId || !privateKey) {
