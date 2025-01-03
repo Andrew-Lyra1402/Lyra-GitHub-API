@@ -1,10 +1,11 @@
 import { App } from "octokit";
 import { createNodeMiddleware } from "@octokit/webhooks";
+import {WebhookEvent} from "@octokit/webhooks-types";
 import * as http from "http";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { Repository, WebhookPayload } from "./types";
-import { handleInstallation, handlePush } from "./event-handler";
+import { handleAddRepositories, handleInstallationDeleted, handleInstallationRepositoriesAdded, handleInstallationRepositoriesRemoved, handlePush } from "./event-handler";
 
 dotenv.config();
 
@@ -36,7 +37,7 @@ app.webhooks.on('installation.created', async ({ payload }) => {
     console.log("Installation created");
     
     const typedPayload = payload as unknown as WebhookPayload;
-    handleInstallation(
+    handleAddRepositories(
       app,
       prisma,
       typedPayload.installation,
@@ -55,11 +56,25 @@ app.webhooks.on("push", async ({ payload }) => {
   
 });
 
+app.webhooks.on("installation.deleted", async ({ payload }) => {
+  handleInstallationDeleted(app, prisma, payload);
+});
+
+app.webhooks.on("installation_repositories.added", async ({ payload }) => {
+  handleInstallationRepositoriesAdded(app, prisma, payload);
+});
+
+app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
+  handleInstallationRepositoriesRemoved(app, prisma, payload);
+  payload.repositories_removed.forEach(repo => {
+    console.log(repo.full_name);
+  });
+});
 
 const middleware = createNodeMiddleware(app.webhooks, {
   path: "/api/webhook",
 });
-
+ 
 // Update your server startup
 http.createServer(middleware).listen(port, () => {
   console.log(`Server listening on port ${port}`);
