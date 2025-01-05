@@ -103,6 +103,24 @@ export async function handleAddRepositories(
           repoRecords.map((repo) => [repo.name, repo.id])
         );
 
+        // Collect unique authors from commits
+        const uniqueAuthors = new Set<string>();
+        repositories.forEach(repo => {
+          const commits = repoCommitsMap.get(repo) || [];
+          commits.forEach(commit => {
+            if (commit.author?.login) uniqueAuthors.add(commit.author.login);
+            if (commit.committer?.login) uniqueAuthors.add(commit.committer.login);
+          });
+        });
+
+        // Upsert all authors
+        await ctx.user.createMany({
+          data: Array.from(uniqueAuthors).map(username => ({
+            GitHubUsername: username
+          })),
+          skipDuplicates: true
+        });
+
         const allCommitsData: Omit<Commit, "id">[] = repositories.flatMap(
           (repo) => {
             const commits = repoCommitsMap.get(repo) || [];
@@ -243,11 +261,7 @@ export async function handleInstallationDeleted(
       await tx.repo.deleteMany({
         where: { userId: user.id },
       });
-
-      // Finally, delete the user
-      await tx.user.delete({
-        where: { id: user.id },
-      });
+      
     });
 
     console.log(`Successfully deleted all data for user: ${username}`);

@@ -42,5 +42,11 @@ model Commit {
   committer   String?
   numberOfLinesAdded Int?
   numberOfLinesRemoved Int?
-
 }
+
+model SlackAndGithubUser {
+  id      String   @id @default(cuid())
+  slackUserId String
+  githubUserName String
+}
+
