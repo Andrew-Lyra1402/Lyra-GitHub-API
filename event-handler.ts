@@ -109,7 +109,6 @@ export async function handleAddRepositories(
           const commits = repoCommitsMap.get(repo) || [];
           commits.forEach(commit => {
             if (commit.author?.login) uniqueAuthors.add(commit.author.login);
-            if (commit.committer?.login) uniqueAuthors.add(commit.committer.login);
           });
         });
 

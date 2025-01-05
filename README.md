@@ -1,4 +1,4 @@
-### Pre-Deployment Steps
+# Pre-Deployment Steps
 
 Run these before deploying.
 
