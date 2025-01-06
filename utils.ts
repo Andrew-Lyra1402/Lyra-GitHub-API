@@ -58,17 +58,17 @@ export async function listCommitsForUser(username: string) {
 const removeMergeCommits = async () => {
   const prisma = new PrismaClient();
   const commits = await prisma.commit.deleteMany({
-    where: { message: { contains: "Merge branch 'main' into" } },
+    where: { message: { contains: "Merge" } },
   });
   return commits;
 }
 
-// listCommitsForUser("datleXx").then(async (commits) => {
-//   const content = JSON.stringify(commits, null, 2); // Pretty print JSON
-//   await writeFile('commits.txt', content);
-// }).catch(error => {
-//   console.error('Error writing commits to file:', error);
-// });
+listCommitsForUser("Andrew-Lyra1402").then(async (commits) => {
+  const content = JSON.stringify(commits, null, 2); // Pretty print JSON
+  await writeFile('commits.txt', content);
+}).catch(error => {
+  console.error('Error writing commits to file:', error);
+});
 
 // removeMergeCommits().then(async (commits) => {
 //   const content = JSON.stringify(commits, null, 2); // Pretty print JSON

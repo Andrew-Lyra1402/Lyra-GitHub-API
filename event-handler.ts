@@ -63,16 +63,40 @@ export async function handleAddRepositories(
     for (const repo of repositories) {
       try {
         console.log("fetching commits for repo ", repo.name);
-        const { data: commits } = await installationClient.request<
-          DetailedCommit[]
-        >("GET /repos/{owner}/{repo}/commits", {
-          owner: account.login,
-          repo: repo.name,
-          per_page: 1000,
-        });
+        
+        // First get all branches
+        const { data: branches } = await installationClient.request(
+          "GET /repos/{owner}/{repo}/branches",
+          {
+            owner: account.login,
+            repo: repo.name,
+            per_page: 1000,
+          }
+        );
+
+        // Fetch commits for each branch and combine them
+        const allCommits: DetailedCommit[] = [];
+        for (const branch of branches) {
+          const { data: branchCommits } = await installationClient.request<DetailedCommit[]>(
+            "GET /repos/{owner}/{repo}/commits",
+            {
+              owner: account.login,
+              repo: repo.name,
+              sha: branch.name,
+              per_page: 1000,
+            }
+          );
+          allCommits.push(...branchCommits);
+        }
+
+        // Remove duplicate commits (same SHA)
+        const uniqueCommits = Array.from(
+          new Map(allCommits.map(commit => [commit.sha, commit])).values()
+        );
+        
         console.log("completed fetching commits for repo ", repo.name);
         // Only store commits with less than 2 parents (non-merge commits)
-        const nonMergeCommits = commits.filter((commit: any) => !commit.parents || commit.parents.length <= 1);
+        const nonMergeCommits = uniqueCommits.filter((commit: any) => !commit.parents || commit.parents.length <= 1);
         repoCommitsMap.set(repo, nonMergeCommits);
       } catch (error) {
         console.log("error fetching commits for repo ", repo.name, error);
