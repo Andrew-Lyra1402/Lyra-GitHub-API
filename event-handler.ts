@@ -71,7 +71,9 @@ export async function handleAddRepositories(
           per_page: 1000,
         });
         console.log("completed fetching commits for repo ", repo.name);
-        repoCommitsMap.set(repo, commits);
+        // Only store commits with less than 2 parents (non-merge commits)
+        const nonMergeCommits = commits.filter((commit: any) => !commit.parents || commit.parents.length <= 1);
+        repoCommitsMap.set(repo, nonMergeCommits);
       } catch (error) {
         console.log("error fetching commits for repo ", repo.name, error);
       }
@@ -197,18 +199,20 @@ export async function handlePush(
     });
 
     // Process new commits
-
+    
     const commits = await prisma.commit.createManyAndReturn({
-      data: payload.commits.map((commit: any) => ({
-        message: commit.message,
-        repoId: repo.id,
-        commitHash: commit.id,
-        author: commit.author.username || null,
-        committer: commit.committer.username || null,
-        timestamp: new Date(commit.timestamp),
-        numberOfLinesAdded: null,
-        numberOfLinesRemoved: null,
-      })),
+      data: payload.commits
+        .filter((commit: any) => !commit.parents || commit.parents.length <= 1)
+        .map((commit: any) => ({
+          message: commit.message,
+          repoId: repo.id,
+          commitHash: commit.id,
+          author: commit.author.username || null,
+          committer: commit.committer.username || null,
+          timestamp: new Date(commit.timestamp),
+          numberOfLinesAdded: null,
+          numberOfLinesRemoved: null,
+        })),
     });
 
     // Update commit stats for the new commits

@@ -6,6 +6,7 @@ the user details and adds the repos to the database
 */
 
 import { PrismaClient } from "@prisma/client";
+import { writeFile } from 'fs/promises';
 
 export async function removeDuplicatedCommits() {
   const prisma = new PrismaClient();
@@ -45,3 +46,31 @@ export async function removeDuplicatedCommits() {
     }
   }
 }
+
+export async function listCommitsForUser(username: string) {
+  const prisma = new PrismaClient();
+  const commits = await prisma.commit.findMany({
+    where: { author: username },
+  });
+  return commits;
+}
+
+const removeMergeCommits = async () => {
+  const prisma = new PrismaClient();
+  const commits = await prisma.commit.deleteMany({
+    where: { message: { contains: "Merge branch 'main' into" } },
+  });
+  return commits;
+}
+
+// listCommitsForUser("datleXx").then(async (commits) => {
+//   const content = JSON.stringify(commits, null, 2); // Pretty print JSON
+//   await writeFile('commits.txt', content);
+// }).catch(error => {
+//   console.error('Error writing commits to file:', error);
+// });
+
+// removeMergeCommits().then(async (commits) => {
+//   const content = JSON.stringify(commits, null, 2); // Pretty print JSON
+//   await writeFile('commits.txt', content);
+// });
