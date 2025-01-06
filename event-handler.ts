@@ -215,7 +215,7 @@ export async function handlePush(
     await updateCommitStats(
       installationClient,
       prisma,
-      payload.repository.owner.name,
+      payload.repository.owner.login,
       payload.repository.name,
       commits
     );

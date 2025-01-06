@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx index.ts",
+    "postinstall": "prisma generate",
     "smee": "npx smee -u https://smee.io/xnJNcm7zRkfRvQS4 -t http://localhost:3000/api/webhook"
   },
   "keywords": [],

@@ -16,7 +16,7 @@ datasource db {
 model User {
   id      String   @id @default(cuid())
   GitHubUsername    String @unique
-  slackUserId String? @unique
+  slackUserId BigInt?
   repos   Repo[]
 }
 
@@ -33,7 +33,7 @@ model Repo {
 model Commit {
   id          Int      @id @default(autoincrement())
   message     String
-  commitHash  String?
+  commitHash  String   @unique
   timestamp   DateTime?
   repo        Repo     @relation(fields: [repoId], references: [id])
   repoId      String
