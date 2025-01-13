@@ -7,6 +7,8 @@ the user details and adds the repos to the database
 
 import { PrismaClient } from "@prisma/client";
 import { writeFile } from 'fs/promises';
+import { Octokit } from "@octokit/rest";
+import { createAppAuth } from "@octokit/auth-app";
 
 export async function removeDuplicatedCommits() {
   const prisma = new PrismaClient();
@@ -50,11 +52,30 @@ export async function removeDuplicatedCommits() {
 export async function listCommitsForUser(username: string) {
   const prisma = new PrismaClient();
   const commits = await prisma.commit.findMany({
-    where: { author: username },
+    where: { 
+      author: username,
+      timestamp: {
+        gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24)
+      }
+    }
+  });
+  
+  return commits;
+}
+const getLatestCommit = async () => {
+  const prisma = new PrismaClient();
+  const commits = await prisma.commit.findFirst({
+    orderBy: { timestamp: 'desc' },
   });
   return commits;
 }
-
+const findCommitWithMerge = async () => {
+  const prisma = new PrismaClient();
+  const commits = await prisma.commit.findMany({
+    where: { message: { contains: "Merge" } },
+  });
+  return commits;
+}
 const removeMergeCommits = async () => {
   const prisma = new PrismaClient();
   const commits = await prisma.commit.deleteMany({
@@ -63,14 +84,62 @@ const removeMergeCommits = async () => {
   return commits;
 }
 
-listCommitsForUser("Andrew-Lyra1402").then(async (commits) => {
-  const content = JSON.stringify(commits, null, 2); // Pretty print JSON
-  await writeFile('commits.txt', content);
-}).catch(error => {
-  console.error('Error writing commits to file:', error);
-});
+// getLatestCommit().then(async (commits) => {
+//   const content = JSON.stringify(commits, null, 2); // Pretty print JSON
+//   await writeFile('commits.txt', content);
+// }).catch(error => {
+//   console.error('Error writing commits to file:', error);
+// });
+// listCommitsForUser("anthnykr").then(async (commits) => {
+//   const content = JSON.stringify(commits, null, 2); // Pretty print JSON
+//   await writeFile('commits.txt', content);
+// }).catch(error => {
+//   console.error('Error writing commits to file:', error);
+// });
 
 // removeMergeCommits().then(async (commits) => {
 //   const content = JSON.stringify(commits, null, 2); // Pretty print JSON
 //   await writeFile('commits.txt', content);
 // });
+
+findCommitWithMerge().then(async (commits) => {
+  const content = JSON.stringify(commits, null, 2); // Pretty print JSON
+  await writeFile('commits.txt', content);
+});
+
+
+const getCommitByHash = async (hash: string, owner: string, repo: string) => {
+  const octokit = new Octokit({
+    authStrategy: createAppAuth,
+    auth: {
+      appId: process.env.GITHUB_APP_ID!,
+      privateKey: process.env.GITHUB_PRIVATE_KEY!,
+    },
+  });
+
+  try {
+    // Get the installation for this repository
+    const { data: installation } = await octokit.apps.getRepoInstallation({
+      owner,
+      repo,
+    });
+
+    // Create a new Octokit instance with the installation token
+    const installationOctokit = new Octokit({
+      auth: await octokit.auth({
+        type: "installation",
+        installationId: installation.id,
+      }),
+    });
+
+    const { data: commit } = await installationOctokit.repos.getCommit({
+      owner,
+      repo,
+      ref: hash,
+    });
+    return commit;
+  } catch (error) {
+    console.error('Error fetching commit:', error);
+    return null;
+  }
+}

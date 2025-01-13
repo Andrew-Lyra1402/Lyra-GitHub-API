@@ -14,7 +14,7 @@ export async function updateCommitStats(
     for (const commit of commits) {
       try {
         const { data: detailedCommit } =
-          await installationClient.request<DetailedCommit>(
+          await installationClient.request<{data: DetailedCommit}>(
             "GET /repos/{owner}/{repo}/commits/{ref}",
             {
               owner,

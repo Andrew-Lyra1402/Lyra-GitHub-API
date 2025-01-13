@@ -1,6 +1,5 @@
 import { App } from "octokit";
 import { createNodeMiddleware } from "@octokit/webhooks";
-import {WebhookEvent} from "@octokit/webhooks-types";
 import * as http from "http";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
